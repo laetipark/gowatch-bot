@@ -2,9 +2,9 @@ import {EmbedBuilder} from "discord.js";
 
 const embed = (name, time) => new EmbedBuilder()
     .setColor(0x2ECC70)
-    .setTitle("공부 기록 시작")
+    .setTitle(name)
     .addFields({
-        name: name,
+        name: "📖 공부 시작 시간",
         value: time
     }).toJSON();
 

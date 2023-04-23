@@ -15,6 +15,8 @@
     "nodemon": "^2.0.22"
   },
   "dependencies": {
+    "@discordjs/rest": "^1.7.0",
+    "@discordjs/voice": "^0.16.0",
     "discord.js": "^14.9.0",
     "dotenv": "^16.0.3",
     "mysql2": "^3.2.3",

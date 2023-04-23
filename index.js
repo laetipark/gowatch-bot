@@ -50,8 +50,7 @@ sequelize.sync({
 
 client.on('interactionCreate', async interaction => {
     if (interaction.isChatInputCommand()) {
-        interaction.reply(await commandExecution(interaction.commandName, interaction.user.id, interaction.user.username))
-            .then(res => console.log(`${res.interaction.commandName} 호출 성공`));
+        interaction.reply(await commandExecution(interaction.commandName, interaction.user.id, interaction.user.tag));
     }
 }).login(discordToken).then(() => {
     console.log('[System] es laetus :)');
