@@ -10,7 +10,7 @@ import {
 } from './models/index.js';
 
 import commandDefinition from "./events/command_definition.js";
-import commandExecution from "./events/command_executable.js";
+import commandExecution from "./events/command_execution.js";
 
 config();
 
@@ -49,8 +49,10 @@ sequelize.sync({
 });
 
 client.on('interactionCreate', async interaction => {
+    const {options} = interaction;
+
     if (interaction.isChatInputCommand()) {
-        interaction.reply(await commandExecution(interaction.commandName, interaction.user.id, interaction.user.tag));
+        interaction.reply(await commandExecution(interaction.commandName, interaction.user.id, interaction.user.tag, options));
     }
 }).login(discordToken).then(() => {
     console.log('[System] es laetus :)');

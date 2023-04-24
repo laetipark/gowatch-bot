@@ -4,6 +4,10 @@ export default class Record extends Sequelize.Model {
     static init = sequelize => super.init({
         start: {
             type: Sequelize.DATE,
+            allowNull: false,
+        },
+        content: {
+            type: Sequelize.STRING(20),
             allowNull: true,
         }
     }, {

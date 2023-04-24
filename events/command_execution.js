@@ -2,9 +2,11 @@ import recordStart from "../commands/record_start.js";
 import recordEnd from "../commands/record_end.js";
 import Record from "../models/record.js";
 
-const commandsExecution = async (commandName, userID, userName) => {
+const commandsExecution = async (commandName, userID, userName, options) => {
 
     if (commandName === '기록') {
+        const content = options.getString("내용") !== null ? options.getString("내용") : " ";
+
         const UTC = new Date().getTime();
         const time = new Date(UTC);
         const startTime =
@@ -23,11 +25,12 @@ const commandsExecution = async (commandName, userID, userName) => {
         if (member === null) {
             await Record.create({
                 id: userID,
-                start: time
+                start: time,
+                content: content
             });
 
             return {
-                embeds: [recordStart(userName, startTime)]
+                embeds: [recordStart(userName, startTime, content)]
             }
         } else {
             const mTime = new Date(member.start);
@@ -49,7 +52,7 @@ const commandsExecution = async (commandName, userID, userName) => {
                 ${time.getHours()}시 ${time.getMinutes()}분 ${time.getSeconds()}초`
 
             const recordTime = `${days}일 ${hours}시간 ${minutes}분 ${seconds}초`
-            const embeds = await recordEnd(userName, startTime, endTime, recordTime)
+            const embeds = await recordEnd(userName, startTime, endTime, recordTime, member.content)
 
             await Record.destroy({
                 where: {
