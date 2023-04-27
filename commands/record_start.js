@@ -1,14 +1,17 @@
 import {EmbedBuilder} from "discord.js";
 
-const embed = (name, time, timer, content) => new EmbedBuilder()
+const embed = (name, startTime, stopTime, timer, content) => new EmbedBuilder()
     .setColor(0x2ECC70)
-    .setTitle(`${name} | \`${content}\``)
+    .setTitle(`${name} 기록 시작 | \`${content}\``)
     .addFields({
         name: "📖 시작 시간",
-        value: time
+        value: `${startTime}`
+    }, {
+        name: "📕 목표 시간",
+        value: `${stopTime}`
     }, {
         name: "📝 설정 시간",
-        value: timer
+        value: `${timer}`
     }).toJSON();
 
 export default embed;

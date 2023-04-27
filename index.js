@@ -11,6 +11,7 @@ import {
 
 import commandDefinition from "./events/command_definition.js";
 import commandExecution from "./events/command_execution.js";
+import Member from "./service/member.js";
 
 config();
 
@@ -48,13 +49,14 @@ sequelize.sync({
     console.error(err);
 });
 
+
 client.on('interactionCreate', async interaction => {
     const {options} = interaction;
+    const Record = new Member;
 
     if (interaction.isChatInputCommand()) {
-        interaction.reply(await commandExecution(client, interaction.commandName, interaction.user, interaction.channel, options));
+        interaction.reply(await commandExecution(client, interaction.commandName, interaction.user, interaction.channel, options, Record));
     }
-
 }).login(discordToken).then(() => {
     console.log('[System] es laetus :)');
 }).catch(err => {

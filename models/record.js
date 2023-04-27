@@ -6,6 +6,10 @@ export default class Record extends Sequelize.Model {
             type: Sequelize.DATE,
             allowNull: false,
         },
+        timer: {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+        },
         content: {
             type: Sequelize.STRING(20),
             allowNull: true,
