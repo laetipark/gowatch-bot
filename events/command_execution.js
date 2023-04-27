@@ -1,6 +1,9 @@
 import recordStart from "../commands/record_start.js";
 import recordEnd from "../commands/record_end.js";
 import Record from "../models/record.js";
+import Timeout from "../service/timeout.js";
+
+const timeoutArray = []
 
 const getEndTime = (start, end) => {
     const mTime = new Date(start);
@@ -24,7 +27,7 @@ const getEndTime = (start, end) => {
     return [startTime, endTime, recordTime];
 }
 
-const commandsExecution = async (client, commandName, user, options) => {
+const commandsExecution = async (client, commandName, user, channel, options) => {
 
     if (commandName === '기록') {
         const content = options.getString("내용") !== null ? options.getString("내용") : " ";
@@ -44,10 +47,41 @@ const commandsExecution = async (client, commandName, user, options) => {
             }
         }
 
+        const timeout = async () => {
+            const member = await Record.findOne({
+                where: {
+                    id: user.id
+                },
+                raw: true,
+            }).then(result => {
+                return result;
+            });
+
+            if (member !== null) {
+                const end = new Date(time.getTime() + timer(options.getString("타이머")));
+                const [startTime, endTime, recordTime] =
+                    getEndTime(time, end)
+
+                await Record.destroy({
+                    where: {
+                        id: user.id
+                    }
+                });
+
+                client.channels.fetch(channel.id)
+                    .then(channel => {
+                        channel.send({
+                            content: `<@${user.id}>님의 \`${content}\` 기록이 종료되었습니다.`,
+                            embeds: [recordEnd(user.tag, startTime, endTime, recordTime, content)]
+                        })
+                    })
+            }
+        };
+
         const UTC = new Date().getTime();
         const time = new Date(UTC);
         const recordTime =
-            `\`${time.getFullYear()}년 ${time.getMonth() + 1}월 ${time.getDate()}일\n${time.getHours()}시 ${time.getMinutes()}분 ${time.getSeconds()}초\``
+            `\`${time.getFullYear()}년 ${time.getMonth() + 1}월 ${time.getDate()}일\n${time.getHours()}시 ${time.getMinutes()}분 ${time.getSeconds()}초\``;
 
         const member = await Record.findOne({
             where: {
@@ -65,36 +99,7 @@ const commandsExecution = async (client, commandName, user, options) => {
                 content: content
             });
 
-            setTimeout(async () => {
-                const member = await Record.findOne({
-                    where: {
-                        id: user.id
-                    },
-                    raw: true,
-                }).then(result => {
-                    return result;
-                });
-
-                if (member !== null) {
-                    const end = new Date(time.getTime() + timer(options.getString("타이머")));
-                    const [startTime, endTime, recordTime] =
-                        getEndTime(time, end)
-
-                    await Record.destroy({
-                        where: {
-                            id: user.id
-                        }
-                    });
-
-                    client.channels.fetch("1029444473165459527")
-                        .then(channel => {
-                            channel.send({
-                                content: `<@${user.id}>님의 \`${content}\` 기록이 종료되었습니다.`,
-                                embeds: [recordEnd(user.tag, startTime, endTime, recordTime, content)]
-                            })
-                        })
-                }
-            }, timer(options.getString("타이머")));
+            timeoutArray.push(new Timeout(user.id, timeout, timer(options.getString("타이머"))));
 
             const recordTimer =
                 options.getString("타이머") !== null ?
@@ -113,6 +118,8 @@ const commandsExecution = async (client, commandName, user, options) => {
                     id: user.id
                 }
             });
+            timeoutArray.find(item => item.id === user.id).stop();
+            delete timeoutArray.find(item => item.id === user.id);
 
             return {
                 embeds: [recordEnd(user.tag, startTime, endTime, recordTime, member.content)]

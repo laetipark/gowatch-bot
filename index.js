@@ -52,7 +52,7 @@ client.on('interactionCreate', async interaction => {
     const {options} = interaction;
 
     if (interaction.isChatInputCommand()) {
-        interaction.reply(await commandExecution(client, interaction.commandName, interaction.user, options));
+        interaction.reply(await commandExecution(client, interaction.commandName, interaction.user, interaction.channel, options));
     }
 
 }).login(discordToken).then(() => {
