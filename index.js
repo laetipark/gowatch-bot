@@ -35,7 +35,7 @@ const rest = new REST({
 rest.put(Routes.applicationGuildCommands(clientID, guildID), {
     body: commandDefinition
 }).then(() => {
-    console.log('Successfully registered application commands_definition.')
+    console.log('[System] Successfully registered application Commands Definition')
 }).catch(err => {
     console.error(err)
 });
@@ -52,8 +52,9 @@ client.on('interactionCreate', async interaction => {
     const {options} = interaction;
 
     if (interaction.isChatInputCommand()) {
-        interaction.reply(await commandExecution(interaction.commandName, interaction.user.id, interaction.user.tag, options));
+        interaction.reply(await commandExecution(client, interaction.commandName, interaction.user, options));
     }
+
 }).login(discordToken).then(() => {
     console.log('[System] es laetus :)');
 }).catch(err => {

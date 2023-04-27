@@ -7,6 +7,10 @@ const commandDefinition = [
             option.setName('내용')
                 .setDescription('내용을 입력합니다.')
                 .setRequired(false))
+        .addStringOption(option =>
+            option.setName('타이머')
+                .setDescription('타이머 시간을 입력합니다.')
+                .setRequired(false))
         .toJSON(),
 ];
 
