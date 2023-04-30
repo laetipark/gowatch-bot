@@ -7,9 +7,10 @@ export default class Member {
             id: id,
             start: currentTime,
             timer: timer,
-            content: content
+            content: content,
+            pause: false
         });
-    }
+    };
 
     selectMember = async (id) => {
         return await Record.findOne({
@@ -20,7 +21,7 @@ export default class Member {
         }).then(result => {
             return result;
         });
-    }
+    };
 
     selectMembers = async () => {
         return await Record.findOne({
@@ -28,7 +29,17 @@ export default class Member {
         }).then(result => {
             return result;
         });
-    }
+    };
+
+    updateMemberPause = async (id, pause) => {
+        return await Record.update({
+            pause: pause
+        }, {
+            where: {
+                id: id
+            }
+        });
+    };
 
     deleteMember = async (id) => {
         await Record.destroy({
@@ -36,5 +47,5 @@ export default class Member {
                 id: id
             }
         });
-    }
+    };
 }

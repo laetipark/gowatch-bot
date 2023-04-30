@@ -49,7 +49,6 @@ sequelize.sync({
     console.error(err);
 });
 
-
 client.on('interactionCreate', async interaction => {
     const {options} = interaction;
     const Record = new Member;

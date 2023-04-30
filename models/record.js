@@ -13,6 +13,10 @@ export default class Record extends Sequelize.Model {
         content: {
             type: Sequelize.STRING(20),
             allowNull: true,
+        },
+        pause: {
+            type: Sequelize.BOOLEAN,
+            allowNull: true,
         }
     }, {
         sequelize,

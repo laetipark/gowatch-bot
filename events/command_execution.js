@@ -1,12 +1,20 @@
-import recordStart from "../commands/record_start.js";
-import recordEnd from "../commands/record_end.js";
+import {
+    recordStartEmbed,
+    recordStopEmbed,
+    recordPauseEmbed,
+    recordResumeEmbed,
+    recordInfoEmbed
+} from "../commands/recordCommands.js";
 import Timeout from "../service/timeout.js";
 
 const timeoutArray = []
 
-const getTime = (beginTime, endTime) => {
-    const mTime = new Date(beginTime);
-    const timeDiff = endTime.getTime() - mTime.getTime(),
+const getParamTime = (time) => {
+    return `\`${time.getFullYear()}년 ${time.getMonth() + 1}월 ${time.getDate()}일\n${time.getHours()}시 ${time.getMinutes()}분 ${time.getSeconds()}초\``;
+}
+
+const getRecordTime = (beginTime, endTime) => {
+    const timeDiff = endTime.getTime() - beginTime.getTime(),
         secondMS = Math.floor(timeDiff / 1000),
         minuteMS = Math.floor(secondMS / 60),
         hourMS = Math.floor(minuteMS / 60),
@@ -15,14 +23,8 @@ const getTime = (beginTime, endTime) => {
         minutes = minuteMS % 60,
         hours = hourMS % 24;
 
-    const startTime =
-        `\`${mTime.getFullYear()}년 ${mTime.getMonth() + 1}월 ${mTime.getDate()}일\n${mTime.getHours()}시 ${mTime.getMinutes()}분 ${mTime.getSeconds()}초\``;
-    const stopTime =
-        `\`${endTime.getFullYear()}년 ${endTime.getMonth() + 1}월 ${endTime.getDate()}일\n${endTime.getHours()}시 ${endTime.getMinutes()}분 ${endTime.getSeconds()}초\``;
-    const recordTime = `\`${days}일 ${hours}시간 ${minutes}분 ${seconds}초\``;
-
-    return [startTime, stopTime, recordTime];
-};
+    return `\`${days}일 ${hours}시간 ${minutes}분 ${seconds}초\``;
+}
 
 const getTimer = (strTimer) => {
     if (strTimer !== null) {
@@ -49,20 +51,21 @@ const timeout = async (client, channel, Record, user, startTime, stopTime, recor
         client.channels.fetch(channel.id).then(channel => {
             channel.send({
                 content: `<@${user.id}>님의 \`${record.content}\` 기록이 종료되었습니다.`,
-                embeds: [recordEnd(user.tag, startTime, stopTime, recordTime, record.content)]
+                embeds: [recordStopEmbed(user.tag, startTime, stopTime, recordTime, record.content)]
             })
         });
     }
 };
 
 const commandsExecution = async (client, commandName, user, channel, options, Record) => {
+
+    // 현재 시간
+    const currentTime = new Date();
+
     if (commandName === '기록') {
         // "내용" option 값을 받음
         const optionContent = options.getString("내용");
         const optionTimer = options.getString("타이머");
-
-        // 현재 시간
-        const currentTime = new Date();
 
         // select Record
         const record = await Record.selectMember(user.id);
@@ -70,8 +73,11 @@ const commandsExecution = async (client, commandName, user, channel, options, Re
         if (record === null) {
             await Record.insertMember(user.id, currentTime, getTimer(optionTimer), optionContent);
             const endTime = new Date(currentTime.getTime() + getTimer(optionTimer));
-            const [startTime, stopTime, recordTime] =
-                getTime(currentTime, endTime);
+
+            const startTime = getParamTime(currentTime);
+            const stopTime = getParamTime(endTime);
+            const recordTime = getRecordTime(currentTime, endTime);
+
             const targetTime =
                 optionTimer !== null ?
                     `\`${optionTimer.replace(/[hH]/, "시간").replace(/[mM]/, "분").replace(/[sS]/, "초")}\`` :
@@ -80,19 +86,101 @@ const commandsExecution = async (client, commandName, user, channel, options, Re
             timeoutArray.push(new Timeout(user, () => timeout(client, channel, Record, user, startTime, stopTime, recordTime), getTimer(optionTimer)));
 
             return {
-                embeds: [recordStart(user.tag, startTime, stopTime, targetTime, optionContent)]
+                content: `<@${user.id}>님의 \`${optionContent}\` 기록을 시작합니다.`,
+                embeds: [recordStartEmbed(user.tag, startTime, stopTime, targetTime, optionContent)]
             };
         } else {
-            const [startTime, stopTime, recordTime] =
-                getTime(record.start, currentTime);
+            const timeoutItem = timeoutArray.find(item => item.id === user.id);
+            const startTime = getParamTime(new Date(record.start));
+            const useTime = getRecordTime(0, timeoutItem?.getUse());
+            const remainTime = getRecordTime(0, timeoutItem?.getRemain());
+
+            return {
+                content: `현재 <@${user.id}>님의 \`${record.content}\` 기록이 진행 중입니다.`,
+                embeds: [recordInfoEmbed(user.tag, startTime, useTime, remainTime, record.pause, record.content)]
+            };
+        }
+    } else if (commandName === '중지') {
+        const record = await Record.selectMember(user.id);
+
+        if (record !== null) {
+            const timeoutItem = timeoutArray.find(item => item.id === user.id);
+
+            const startTime = getParamTime(new Date(record.start));
+            const useTime = getRecordTime(new Date(0), new Date(timeoutItem?.getUse()));
+            const remainTime = getRecordTime(new Date(0), new Date(timeoutItem?.getRemain()));
+
+            if (record.pause) {
+                return {
+                    content: `현재 <@${user.id}>님의 \`${record.content}\` 기록이 중지 상태입니다.`,
+                    embeds: [recordInfoEmbed(user.tag, startTime, useTime, remainTime, record.pause, record.content)]
+                };
+            } else {
+                const timeoutItem = timeoutArray.find(item => item.id === user.id);
+
+                await Record.updateMemberPause(user.id, true);
+                await timeoutItem?.pause();
+
+                const startTime = getParamTime(new Date(record.start));
+                const useTime = getRecordTime(record.start, currentTime);
+                const remainTime = getRecordTime(currentTime, new Date(currentTime.getTime() + timeoutItem?.getRemain()))
+
+                return {
+                    content: `<@${user.id}>님의 \`${record.content}\` 기록이 중지되었습니다.`,
+                    embeds: [recordPauseEmbed(user.tag, startTime, useTime, remainTime, record.content)]
+                };
+            }
+        } else {
+            return {
+                content: `<@${user.id}>님의 기록이 존재하지 않아요!\n\`/기록\`명령을 먼저 이용해주세요. `
+            };
+        }
+    } else if (commandName === "재개") {
+        const record = await Record.selectMember(user.id);
+        if (record !== null) {
+            const timeoutItem = timeoutArray.find(item => item.id === user.id);
+            const startTime = getParamTime(new Date(record.start));
+
+            const endTime = new Date(currentTime.getTime() + timeoutItem?.getRemain());
+            const resumeTime = getParamTime(currentTime);
+            const stopTime = getParamTime(endTime);
+            const remainTime = getRecordTime(currentTime, endTime);
+            const recordTime = getRecordTime(new Date(currentTime.getTime() - timeoutItem?.getUse()), endTime);
+
+            await timeoutItem?.setCallback(() => timeout(client, channel, Record, user, startTime, stopTime, recordTime));
+            await timeoutItem?.resume();
+
+            await Record.updateMemberPause(user.id, false);
+            return {
+                content: `<@${user.id}>님의 \`${record.content}\` 기록을 재개합니다.`,
+                embeds: [recordResumeEmbed(user.tag, resumeTime, stopTime, remainTime, record.content)]
+            };
+        } else {
+            return {
+                content: `<@${user.id}>님의 기록이 존재하지 않아요!\n\`/기록\`명령을 먼저 이용해주세요. `
+            };
+        }
+    } else if (commandName === '정지') {
+        const record = await Record.selectMember(user.id);
+        if (record !== null) {
+            const timeoutItem = timeoutArray.find(item => item.id === user.id);
+
+            const startTime = getParamTime(new Date(record.start));
+            const stopTime = getParamTime(currentTime);
+
+            const recordTime = record.pause ? getRecordTime(new Date(0), new Date(timeoutItem?.getUse())) : getRecordTime(record.start, currentTime);
 
             await Record.deleteMember(user.id);
-
-            await timeoutArray.find(item => item.id === user.id).stop();
+            await timeoutArray.find(item => item.id === user.id)?.stop();
             delete timeoutArray.find(item => item.id === user.id);
 
             return {
-                embeds: [recordEnd(user.tag, startTime, stopTime, recordTime, record.content)]
+                content: `<@${user.id}>님의 \`${record.content}\` 기록이 정지되었습니다.`,
+                embeds: [recordStopEmbed(user.tag, startTime, stopTime, recordTime, record.content)]
+            };
+        } else {
+            return {
+                content: `<@${user.id}>님의 기록이 존재하지 않아요!\n\`/기록\`명령을 먼저 이용해주세요. `
             };
         }
     }
