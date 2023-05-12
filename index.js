@@ -10,13 +10,16 @@ import {
 } from './models/index.js';
 
 import commandDefinition from "./events/command_definition.js";
-import commandExecution from "./events/command_execution.js";
-import Member from "./service/member.js";
+import commandExecution, {addPausedFocus} from "./events/command_execution.js";
+import {voiceService, focusService} from "./service/index.js"
 
 config();
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds]
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates
+    ],
 });
 
 const {
@@ -51,12 +54,36 @@ sequelize.sync({
 
 client.on('interactionCreate', async interaction => {
     const {options} = interaction;
-    const Record = new Member;
 
     if (interaction.isChatInputCommand()) {
-        interaction.reply(await commandExecution(client, interaction.commandName, interaction.user, interaction.channel, options, Record));
+        interaction.reply(await commandExecution(client, interaction.commandName, interaction.user, interaction.channel, options));
     }
-}).login(discordToken).then(() => {
+}).on('voiceStateUpdate', async (oldMember, newMember) => {
+    const newUserChannel = newMember.channel; // 들어온 이후
+    const oldUserChannel = oldMember.channel; // 나간 이후
+
+    if (newUserChannel?.members !== undefined) {
+        newUserChannel?.members.map(async member => {
+                await voiceService.insertVoice(
+                    member.user.id,
+                    newUserChannel?.name,
+                    Date.now()
+                )
+            }
+        );
+    }
+
+    if (oldUserChannel?.members !== undefined) {
+        await voiceService.deleteVoice(
+            oldUserChannel?.members
+        );
+    }
+}).login(discordToken).then(async () => {
+    const focusList = await focusService.selectFocusList();
+    if (focusList !== null) {
+        await addPausedFocus(focusList);
+    }
+
     console.log('[System] es laetus :)');
 }).catch(err => {
     console.log('[System] Login Failed! :(');
