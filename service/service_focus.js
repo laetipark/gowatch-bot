@@ -71,7 +71,8 @@ export class focusService {
 
     static selectFocusLeaderBoard = async () => {
         return await TotalFocus.findAll({
-            order: [["total_time", "DESC"]]
+            order: [["total_time", "DESC"]],
+            limit: 10
         });
     };
 }

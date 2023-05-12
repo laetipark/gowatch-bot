@@ -21,7 +21,7 @@ const commandDefinition = [
         .setDescription('기록 목록을 확인합니다.')
         .toJSON(),
     new SlashCommandBuilder().setName('리더보드')
-        .setDescription('음성채팅 또는 집중을 오래한 상위 10명의 유저를 보여줍니다.')
+        .setDescription('음성채팅 또는 집중모드를 오래 사용한 상위 10명의 유저를 보여줍니다.')
         .addStringOption((option) =>
             option.setName('메뉴')
                 .setDescription('확인할 리더보드를 설정합니다.')

@@ -6,7 +6,7 @@ import TotalVoice from "./total_voice.js";
 
 import configFile from "../config/config.js";
 
-const config = configFile.development;
+const config = configFile.database;
 const db = {}
 
 const sequelize =

@@ -56,7 +56,8 @@ export class voiceService {
 
     static selectVoiceLeaderBoard = async () => {
         return await TotalVoice.findAll({
-            order: [["total_time", "DESC"]]
+            order: [["total_time", "DESC"]],
+            limit: 10
         });
     };
 }
