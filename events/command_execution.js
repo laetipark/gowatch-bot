@@ -204,7 +204,7 @@ const commandsExecution = async (client, commandName, user, channel, options) =>
                     return result.map(member => {
                         return {
                             id: member.id,
-                            total_time: `${getFocusTime(0, member.total_time * 1000)}`
+                            total_time: `${getFocusTime(0, member.total_time)}`
                         }
                     });
                 });
@@ -217,7 +217,7 @@ const commandsExecution = async (client, commandName, user, channel, options) =>
                     return result.map(member => {
                         return {
                             id: member.id,
-                            total_time: `${getFocusTime(0, member.total_time * 1000)}`
+                            total_time: `${getFocusTime(0, member.total_time)}`
                         }
                     });
                 });

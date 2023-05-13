@@ -28,14 +28,15 @@ export class voiceService {
             });
 
             oldMembers.map(async member => {
+                console.log(new Date(Date.now()), new Date(member.begin_time))
                 const memberTime = await TotalVoice.findOne({
                     attributes: ["total_time"],
                     where: {
                         id: member.id,
                     }
                 }).then(result => {
-                    return result !== null ? result.total_time + Math.floor((Date.now() - new Date(member.begin_time).getTime()) / 1000) % 60
-                        : Math.floor((Date.now() - new Date(member.begin_time).getTime()) / 1000) % 60;
+                    return result !== null ? result.total_time + (Date.now() - new Date(member.begin_time).getTime())
+                        : Date.now() - new Date(member.begin_time).getTime();
                 });
 
                 await TotalVoice.upsert({

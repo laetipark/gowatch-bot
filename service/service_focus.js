@@ -54,7 +54,7 @@ export class focusService {
                 id: id
             }
         }).then(result => {
-            return result !== null ? result.total_time + (Math.floor(timer / 1000) % 60) : result?.total_time;
+            return result !== null ? result.total_time + timer : result?.total_time;
         });
 
         await TotalFocus.upsert({
