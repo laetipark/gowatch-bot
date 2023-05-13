@@ -62,7 +62,7 @@ client.on('interactionCreate', async interaction => {
     const newUserChannel = newMember.channel; // 들어온 이후
     const oldUserChannel = oldMember.channel; // 나간 이후
 
-    if (newUserChannel?.members !== undefined) {
+    if (newUserChannel?.members !== undefined && oldUserChannel?.members === undefined) {
         newUserChannel?.members.map(async member => {
                 await voiceService.insertVoice(
                     member.user.id,
@@ -71,12 +71,11 @@ client.on('interactionCreate', async interaction => {
                 )
             }
         );
-    }
-
-    if (oldUserChannel?.members !== undefined) {
+    } else if (oldUserChannel?.members !== undefined) {
         await voiceService.deleteVoice(
-            oldUserChannel?.members
+            oldUserChannel?.members.map(member => member.user.id)
         );
+
     }
 }).login(discordToken).then(async () => {
     const focusList = await focusService.selectFocusList();

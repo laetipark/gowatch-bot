@@ -48,7 +48,7 @@ const timeout = async (client, channel, user, startTime, stopTime, recordTime) =
     const record = await focusService.selectFocus(user.id);
 
     if (record !== null) {
-        await focusService.deleteFocus(user.id);
+        await focusService.deleteFocus(user.id, recordTime);
 
         client.channels.fetch(channel.id).then(channel => {
             channel.send({
@@ -162,9 +162,10 @@ const commandsExecution = async (client, commandName, user, channel, options) =>
                 const startTime = getParamTime(new Date(focus.begin_time));
                 const stopTime = getParamTime(currentTime);
 
+                await focusService.updateFocusPause(user.id, false, null);
                 const recordTime = focus.pause ? getFocusTime(0, new Date(timeoutItem?.getUse())) : getFocusTime(focus.begin_time, currentTime);
 
-                await focusService.deleteFocus(user.id);
+                await focusService.deleteFocus(user.id, recordTime);
                 await timeoutArray.find(item => item.id === user.id)?.stop();
                 delete timeoutArray.find(item => item.id === user.id);
 
@@ -238,7 +239,7 @@ export const addPausedFocus = (focusList) => {
             timeoutArray.push(new timeoutService(member.id, () => {
             }, member.timer - (member.pause_time - member.begin_time)));
         } else {
-            await focusService.deleteFocus(member.id);
+            await focusService.deleteFocus(member.id, 0);
         }
     });
 };

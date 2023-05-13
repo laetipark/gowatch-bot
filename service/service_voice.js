@@ -28,7 +28,6 @@ export class voiceService {
             });
 
             oldMembers.map(async member => {
-                console.log(new Date(Date.now()), new Date(member.begin_time))
                 const memberTime = await TotalVoice.findOne({
                     attributes: ["total_time"],
                     where: {

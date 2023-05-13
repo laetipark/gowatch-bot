@@ -37,24 +37,14 @@ export class focusService {
         });
     };
 
-    static deleteFocus = async (id) => {
-        const timer = await StatusFocus.findOne({
-            attributes: ["timer"],
-            where: {
-                id: id,
-                pause: false
-            }
-        }).then(result => {
-            return result !== null ? result.timer : 0;
-        });
-
+    static deleteFocus = async (id, timer) => {
         const memberTime = await TotalFocus.findOne({
             attributes: ["total_time"],
             where: {
                 id: id
             }
         }).then(result => {
-            return result !== null ? result.total_time + timer : result?.total_time;
+            return result !== null ? result.total_time + timer : timer;
         });
 
         await TotalFocus.upsert({

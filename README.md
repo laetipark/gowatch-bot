@@ -6,7 +6,7 @@
 ![Javascript](https://img.shields.io/badge/Javascript-F7DF1E?style=flat&logo=Javascript&logoColor=000000)
 ![IntelliJ](https://img.shields.io/badge/IntelliJ-2023.1-DDDDDD?style=flat&logo=IntelliJIDEA&logoColor=FFFFFF)
 ![JavaScript](https://img.shields.io/badge/Discord.js-v14.7.1-DDDDDD?logo=npm&labelColor=5865F2&logoColor=FFFFFF)
-![Gowatch](https://img.shields.io/badge/Gowatch-1.1.1-DDDDDD?logo=Discord&labelColor=FBD570&logoColor=000000)
+![Gowatch](https://img.shields.io/badge/Gowatch-1.1.2-DDDDDD?logo=Discord&labelColor=FBD570&logoColor=000000)
 
 ### 🤖 명령어
 - ``/집중 기록 [타이머]`` : 해당 내용에 대한 집중모드를 시작(기본 : 1시간)
