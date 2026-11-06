@@ -1,6 +1,6 @@
 # Gowatch
 
-![Gowatch — Discord에서 함께 기록하는 집중 시간](public/gowatch-banner.png)
+![Gowatch 아이콘과 프로젝트명을 배치한 소개 배너](public/gowatch-banner.png)
 
 <img alt="Gowatch" src="./public/Gowatch.png" width="120"/>
 
