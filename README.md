@@ -1,5 +1,7 @@
 # Gowatch
 
+![Gowatch — Discord에서 함께 기록하는 집중 시간](public/gowatch-banner.png)
+
 <img alt="Gowatch" src="./public/Gowatch.png" width="120"/>
 
 ![Node.js](https://img.shields.io/badge/Node.js-v19.2.0-DDDDDD?style=flat&logo=Node.js&logoColor=FFFFFF&labelColor=339933)
